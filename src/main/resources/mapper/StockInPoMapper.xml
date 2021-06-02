@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nick.springboot.mapper.StockInPoMapper">
+    
+    <!--自定义结果集映射规则-->
+<!--    <resultMap id="stockInResultMap" type="com.nick.springboot.entity.StockInPO">-->
+<!--        <id column="id" property="id"/>-->
+<!--        <result column="stock_in_no" property="stockInNo"/>-->
+<!--        <result column="source_no" property="sourceNo"/>-->
+<!--    </resultMap>-->
+
+<!--    <select id="findById" resultMap="stockInResultMap">-->
+<!--        select * from stock_in where id = #{id}-->
+<!--    </select>-->
+
+    <!--根据Map传参
+        #{}:是以预编译的形式，将参数设置到sql语句中:PreparedStatement;防止sql注入
+        ${}:取出的值直接拼装在sql语句中，会有安全问题
+        大多情况下，我们去参数的值都应该使用#{}
+        原生jdbc不支持占位符的地方我们就可以使用${}进行取值
+        比如分表、排序;按照年份分表拆分
+            select * from ${year}_salary where xxx;
+            select * from stock_in order by ${create_date} ${order}
+    -->
+    <select id="findByMap" resultType="com.nick.springboot.entity.StockInPO">
+        select <include refid="stockInColumn"/> from ${tableName} where stock_in_no = #{stockInNo} and enable_flag = #{enableFlag}
+    </select>
+
+    <!--多参数传参，在传参中需要添加@Param注解-->
+    <select id="findByStockInNoAndEnableFlag" resultType="com.nick.springboot.entity.StockInPO">
+        select * from stock_in where stock_in_no = #{stockInNo} and enable_flag = #{enableFlag}
+    </select>
+
+    <!--分段查询2,子查询一对多
+        如果存在多个条件传入到子查询语句中
+           column="{key1=column1,key2=column2}"
+           如下面的条件 column="{parentId=id}"
+            fetchType表示延迟加载 eager立即，lazy延迟
+    -->
+    <resultMap id="stockInAndDetail" type="com.nick.springboot.entity.StockInPO">
+<!--        <id column="id" property="id"/>-->
+<!--        <result column="stock_in_no" property="stockInNo"/>-->
+<!--        <result column="source_no" property="sourceNo"/>-->
+        <collection property="stockInDetailPos"
+                    select="com.nick.springboot.mapper.StockInDetailPoMapper.findAllByParentId"
+                    column="{parentId=id}"
+                    fetchType="eager"
+        />
+    </resultMap>
+    <!--单个参数，#{id}大括号内的值随便填都能生效-->
+    <select id="findById" resultMap="stockInAndDetail">
+        select * from stock_in where id = #{id}
+    </select>
+
+    <!--多参数中如果有对象-->
+    <select id="findByPoJo" resultType="com.nick.springboot.entity.StockInPO">
+        select * from stock_in where stock_in_no = #{stockIn.stockInNo} and enable_flag = #{stockIn.enableFlag}
+    </select>
+
+    <select id="findAllBySourceNoAndEnableFlag" resultType="com.nick.springboot.entity.StockInPO">
+        select * from stock_in where source_no = #{sourceNo} and enable_flag = #{enableFlag}
+    </select>
+
+    <select id="findByIdResultMap" resultType="map">
+        select * from stock_in where id = #{id}
+    </select>
+
+    <select id="findAllBySourceNoGroupResultMap" resultType="com.nick.springboot.entity.StockInPO">
+        select * from stock_in where source_no = #{sourceNo} and enable_flag = #{enableFlag}
+    </select>
+
+    <insert id="insert" parameterType="com.nick.springboot.entity.StockInPO">
+        insert into stock_in(id,stock_in_no,source_no)
+        values(#{id},#{stockInNo},#{sourceNo})
+    </insert>
+
+    <update id="update" parameterType="com.nick.springboot.entity.StockInPO">
+        update stock_in
+        set stock_in_no = #{stockInNo},source_no = #{sourceNo}
+        where id = #{id}
+    </update>
+
+    <update id="updateByConditionSet" parameterType="com.nick.springboot.entity.StockInPO">
+        update stock_in
+        <set>
+            <if test="stockInNo!=null and stockInNo!=&quot;&quot;">
+                stock_in_no = #{stockInNo},
+            </if>
+            <if test="sourceNo!=null and sourceNo!=&quot;&quot;">
+                source_no = #{sourceNo}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <delete id="deleteById" parameterType="string">
+        delete from stock_in where id = #{id}
+    </delete>
+
+
+    <!--联表查询1-->
+    <resultMap id="stockInResultMapDef" type="com.nick.springboot.entity.StockInPO">
+        <id column="sid" property="id"/>
+        <result column="stock_in_no" property="stockInNo"/>
+        <result column="source_no" property="sourceNo"/>
+        <result column="bid" property="billDocUserInfo.id"/>
+        <result column="BILL_DOC_NO"  property="billDocUserInfo.billDocNo"/>
+    </resultMap>
+
+    <!--联表查询2-->
+    <resultMap id="stockInResultMapDef2" type="com.nick.springboot.entity.StockInPO">
+        <id column="sid" property="id"/>
+        <result column="stock_in_no" property="stockInNo"/>
+        <result column="source_no" property="sourceNo"/>
+        <association property="billDocUserInfo" javaType="com.nick.springboot.entity.BillDocUserInfo">
+            <id column="bid" property="id"/>
+            <result column="BILL_DOC_NO" property="billDocNo"/>
+        </association>
+    </resultMap>
+
+    <select id="findByBillDocNo" resultMap="stockInResultMapDef2">
+        select si.id sid,si.stock_in_no,si.source_no,bdui.ID bid,bdui.BILL_DOC_NO
+        from stock_in si,bill_doc_user_info bdui
+        where bdui.BILL_DOC_NO = #{stockInNo}
+        and si.stock_in_no = bdui.BILL_DOC_NO
+    </select>
+
+    <!--联表查询3 分步查询 一对一查询 -->
+    <resultMap id="stockInResultMapDef3" type="com.nick.springboot.entity.StockInPO">
+        <id column="sid" property="id"/>
+        <result column="stock_in_no" property="stockInNo"/>
+        <result column="source_no" property="sourceNo"/>
+        <association property="billDocUserInfo"
+                     select="com.nick.springboot.mapper.BillDocUserInfoMapper.findByBillDocNo"
+                     column="stock_in_no"
+        />
+    </resultMap>
+    <select id="findByBillDocNo2" resultMap="stockInResultMapDef3">
+        select * from stock_in si where si.stock_in_no = #{stockInNo}
+    </select>
+
+
+
+    <select id="findByConditionIf" resultType="com.nick.springboot.entity.StockInPO">
+        select * from stock_in
+        <where>
+            <if test="id!=null and id!=''">
+                id = #{id}
+            </if>
+            <!--这个转义字符表示双引号-->
+            <if test="stockInNo!=null and stockInNo!=&quot;&quot;">
+                and stock_in_no = #{stockInNo}
+            </if>
+            <if test="sourceNo!=null and sourceNo!=&quot;&quot;">
+                and source_no = #{sourceNo}
+            </if>
+            <if test="enableFlag!=null and enableFlag!=&quot;&quot;">
+                and enable_flag = #{enableFlag}
+            </if>
+        </where>
+    </select>
+
+    <!--相当于 swich case-->
+    <select id="findByConditionChoose" resultType="com.nick.springboot.entity.StockInPO">
+        select * from stock_in
+        <where>
+            <choose>
+                <when test="id!=null and id!=''">
+                    id = #{id}
+                </when>
+                <!--这个转义字符表示双引号-->
+                <when test="stockInNo!=null and stockInNo!=&quot;&quot;">
+                    and stock_in_no = #{stockInNo}
+                </when>
+                <when test="sourceNo!=null and sourceNo!=&quot;&quot;">
+                    and source_no = #{sourceNo}
+                </when>
+                <when test="enableFlag!=null and enableFlag!=&quot;&quot;">
+                    and enable_flag = #{enableFlag}
+                </when>
+                <otherwise>
+                    1=1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+        <!--
+        批量查询
+
+        collection:指定要遍历的集合，list类型的参数会特殊处理封装在map中，map的key就叫list
+        item:将当前遍历出的元素赋值给指定的变量
+        separator:每个元素之间的分隔符
+        open:遍历出所有结果拼接一个开始的字符
+        close:遍历出所有结果拼接一个结束的字符
+        index:索引。遍历list的时候index就是索引,item就是当前值，遍历map的时候index表示的就是map的key,item就是map值
+        #{变量名}
+    -->
+    <select id="findByIdIn" resultType="com.nick.springboot.entity.StockInPO">
+        select * from stock_in where id in 
+        <foreach collection="ids" item="item_id" separator="," open="(" close=")">
+            #{item_id}
+        </foreach>
+    </select>
+    
+    <!--
+    批量插入
+
+    -->
+    <insert id="insertAll" >
+        insert into stock_in(id,stock_in_no,source_no) values
+        <foreach collection="stockInPos" item="stockInPo" separator=",">
+            (#{stockInPo.id},#{stockInPo.stockInNo},#{stockInPo.sourceNo})
+        </foreach>
+    </insert>
+
+
+    <sql id="stockInColumn">
+        id,stock_in_no,source_no,wms_bill_no,type,business_time,business_time_status,
+        total_amount,in_time,in_status,currency,total_amount_exclude_tax,total_number,
+        stockroom_id,stockroom_name,stockroom_type,task_id,wh_receipt_id,enclosure_url
+    </sql>
+
+</mapper>
