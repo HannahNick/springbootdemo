@@ -2,6 +2,7 @@ package com.nick.springboot.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.nick.springboot.enumtype.DataSourceEnum;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -173,7 +174,7 @@ public class StockInPO{
     /**
      * 数据来源
      */
-//    DataSourceEnum dataSource;
+    DataSourceEnum dataSource;
 
     /**
      * 订单标签

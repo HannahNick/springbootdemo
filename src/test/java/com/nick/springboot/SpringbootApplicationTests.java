@@ -1,5 +1,6 @@
 package com.nick.springboot;
 
+import com.github.pagehelper.PageHelper;
 import com.nick.springboot.entity.StockInPO;
 import com.nick.springboot.mapper.StockInPoMapper;
 import com.nick.springboot.pojo.StockInPoJo;
@@ -144,8 +145,9 @@ class SpringbootApplicationTests {
 //        stockInPoJo.setSourceNo("WT21201202011260003");
 //        stockInPoJo.setStockInNo("WSI21201202011260024");
 //        stockInPoJo.setId("628781757056583");
+        PageHelper.startPage(1, 10);
         List<StockInPO> stockInPOS = stockInPoMapper.findByConditionChoose(stockInPoJo);
-        System.out.println(stockInPOS);
+        System.out.println(JsonUtils.toJSONString(stockInPOS));
     }
 
     @Test
