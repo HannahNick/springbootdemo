@@ -222,4 +222,56 @@
         stockroom_id,stockroom_name,stockroom_type,task_id,wh_receipt_id,enclosure_url
     </sql>
 
+
+    <!--项目API-->
+
+
+    <select id="findByStockInNoInAndEnableFlag" resultType="com.nick.springboot.entity.StockInPO">
+        select <include refid="stockInColumn"/> from stock_in where stock_in_no in
+        <foreach collection="stockInNoList" item="stockInNos" separator="," open="(" close=")">
+            #{stockInNos}
+        </foreach>
+        and enable_flag = #{enableFlag}
+    </select>
+
+    <select id="findByWhReceiptIdAndEnableFlag" resultType="com.nick.springboot.entity.StockInPO">
+        select <include refid="stockInColumn"/> from stock_in where wh_receipt_id = #{whReceiptId} and enableFlag = #{enableFlag}
+    </select>
+
+    <select id="findAllByOrderNoInAndEnableFlag" resultType="com.nick.springboot.entity.StockInPO">
+        select <include refid="stockInColumn"/> from stock_in where order_no in
+        <foreach collection="orderNos" item="orderNo" separator="," open="(" close=")">
+            #{orderNo}
+        </foreach>
+        and enable_flag = #{enableFlag}
+    </select>
+
+    <select id="findAllPage" resultType="com.nick.springboot.entity.StockInPO">
+        select <include refid="stockInColumn"/> from stock_in
+        <where>
+            <if test="id!=null and id !='' ">
+                id = #{id}
+            </if>
+            <if test="stockInNo!=null and stockInNo !='' ">
+                and stock_in_no = #{stockInNo}
+            </if>
+            <if test="startTime!=null">
+                and in_time >= #{startTime}
+            </if>
+            <if test="endTime!=null and id !='' ">
+                and in_time &lt;= #{endTime}
+            </if>
+            <if test="orgId!=null and id !='' ">
+                and prg_id = #{orgId}
+            </if>
+            <if test="customerAccount!=null and customerAccount !='' ">
+                and customer_account = #{customerAccount}
+            </if>
+            <if test="customerName!=null and customerName !='' ">
+                and customer_name = #{customerName}
+            </if>
+        </where>
+
+    </select>
+
 </mapper>

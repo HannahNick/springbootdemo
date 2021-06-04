@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Date;
+
 /**
  * @author zwj
  * @date 2021/5/31
@@ -16,4 +18,9 @@ public class StockInPoJo {
     String stockInNo;
     String sourceNo;
     String enableFlag;
+    Date startTime;
+    Date endTime;
+    String orgId;
+    String customerAccount;
+    String customerName;
 }

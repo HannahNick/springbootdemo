@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.nick.springboot.entity.StockInPO;
 import com.nick.springboot.mapper.StockInPoMapper;
 import com.nick.springboot.pojo.StockInPoJo;
+import com.nick.springboot.util.DateUtils;
 import com.nick.springboot.util.JsonUtils;
 import net.minidev.json.JSONUtil;
 import org.junit.jupiter.api.Test;
@@ -167,6 +168,18 @@ class SpringbootApplicationTests {
             stockIns.add(stockInPO);
         }
         stockInPoMapper.insertAll(stockIns);
+    }
+
+    @Test
+    void findAllPage(){
+        PageHelper.startPage(1,5);
+        StockInPoJo stockInPoJo = new StockInPoJo();
+        Date start = DateUtils.formatDates("2020-11-26 00:00:00", DateUtils.FORMAT_DATE_TIME);
+        Date end = DateUtils.formatDates("2020-11-30 10:12:19", DateUtils.FORMAT_DATE_TIME);
+        stockInPoJo.setStartTime(start);
+        stockInPoJo.setEndTime(end);
+        List<StockInPO> allPage = stockInPoMapper.findAllPage(stockInPoJo);
+        System.out.println(JsonUtils.toJSONString(allPage));
     }
 
 }
