@@ -3,11 +3,11 @@
 <mapper namespace="com.nick.springboot.mapper.StockInPoMapper">
     
     <!--自定义结果集映射规则-->
-<!--    <resultMap id="stockInResultMap" type="com.nick.springboot.entity.StockInPO">-->
-<!--        <id column="id" property="id"/>-->
-<!--        <result column="stock_in_no" property="stockInNo"/>-->
-<!--        <result column="source_no" property="sourceNo"/>-->
-<!--    </resultMap>-->
+    <resultMap id="stockInResultMap" type="com.nick.springboot.entity.StockInPO">
+        <id column="id" property="id"/>
+        <result column="stock_in_no" property="stockInNo"/>
+        <result column="source_no" property="sourceNo"/>
+    </resultMap>
 
 <!--    <select id="findById" resultMap="stockInResultMap">-->
 <!--        select * from stock_in where id = #{id}-->

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nick.springboot.mapper.IncreaseCreditLineRecordMapper">
+
+    <resultMap id="stockInResultMap" type="com.nick.springboot.entity.StockInPO">
+        <id column="id" property="id"/>
+        <result column="stock_in_no" property="stockInNo"/>
+        <result column="source_no" property="sourceNo"/>
+    </resultMap>
+
+    <sql id="column">
+        id,uuid,production_code,credit_line,used_credit_line,actual_credit_line,production_credit_line,
+        increase_credit_line,state,up_credit_line,credit_line_updated_at,created_by,created_at,updated_at
+    </sql>
+
+    <select id="selectAllByCondition" resultType="com.nick.springboot.entity.IncreaseCreditLineRecord">
+        select
+            <include refid="column"/>
+        from
+            increase_credit_line_record
+        <where>
+            <if test="id!=null and id !='' ">
+                id = #{id}
+            </if>
+            <if test="productionCode!=null and productionCode !='' ">
+                production_code = #{productionCode}
+            </if>
+            <if test="updatedAtStartTime!=null and updatedAtStartTime!='' ">
+                and updated_at >= #{updatedAtStartTime}
+            </if>
+            <if test="updatedAtEndTime!=null and updatedAtEndTime !='' ">
+                and updated_at &lt;= #{updatedAtEndTime}
+            </if>
+            <if test="createdAtStartTime!=null and createdAtStartTime !='' ">
+                and created_at >= #{createdAtStartTime}
+            </if>
+            <if test="createdAtEndTime!=null and createdAtEndTime !='' ">
+                and created_at &lt;= #{createdAtEndTime}
+            </if>
+            <if test="increaseCreditLineMin!=null">
+                and increase_credit_line >= #{increaseCreditLineMin}
+            </if>
+            <if test="increaseCreditLineMax!=null">
+                and increase_credit_line &lt;= #{increaseCreditLineMax}
+            </if>
+            <if test="actualCreditLineMin!=null">
+                and actual_credit_line >= #{actualCreditLineMin}
+            </if>
+            <if test="actualCreditLineMax!=null">
+                and actual_credit_line &lt;= #{actualCreditLineMax}
+            </if>
+        </where>
+            limit ${currentNo}, ${pageSize}
+    </select>
+
+    <select id="selectAllProductCode" resultType="String">
+        select ic.production_code from increase_credit_line_record ic GROUP BY ic.production_code;
+    </select>
+
+    <select id="selectSumInfo" resultType="com.nick.springboot.vo.IncreaseCreditLineSumInfoVo">
+        select
+            count(1) as totalNum ,
+            sum(production_credit_line) as productionCreditLineSum ,
+            avg(production_credit_line) as productionCreditLineAvg ,
+            sum(increase_credit_line) as increaseCreditLineSum,
+            avg(increase_credit_line) as increaseCreditLineAvg
+        from
+            increase_credit_line_record;
+    </select>
+
+</mapper>

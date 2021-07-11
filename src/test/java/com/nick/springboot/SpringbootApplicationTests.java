@@ -1,9 +1,13 @@
 package com.nick.springboot;
 
 import com.github.pagehelper.PageHelper;
+import com.nick.springboot.dto.IncreaseCreditLineRecordRequestDTO;
+import com.nick.springboot.dto.PageDTO;
+import com.nick.springboot.entity.IncreaseCreditLineRecord;
 import com.nick.springboot.entity.StockInPO;
 import com.nick.springboot.mapper.StockInPoMapper;
 import com.nick.springboot.pojo.StockInPoJo;
+import com.nick.springboot.service.IncreaseCreditLineRecordService;
 import com.nick.springboot.util.DateUtils;
 import com.nick.springboot.util.JsonUtils;
 import net.minidev.json.JSONUtil;
@@ -22,6 +26,9 @@ class SpringbootApplicationTests {
 
     @Autowired
     StockInPoMapper stockInPoMapper;
+
+    @Autowired
+    IncreaseCreditLineRecordService increaseCreditLineRecordService;
 
     @Test
     void testMybatis() {
@@ -180,6 +187,15 @@ class SpringbootApplicationTests {
         stockInPoJo.setEndTime(end);
         List<StockInPO> allPage = stockInPoMapper.findAllPage(stockInPoJo);
         System.out.println(JsonUtils.toJSONString(allPage));
+    }
+
+    @Test
+    void testIncrease(){
+        IncreaseCreditLineRecordRequestDTO increaseCreditLineRecordRequestDTO = new IncreaseCreditLineRecordRequestDTO();
+        increaseCreditLineRecordRequestDTO.setCurrentNo(1);
+        increaseCreditLineRecordRequestDTO.setPageSize(2);
+        PageDTO<IncreaseCreditLineRecord> increaseCreditLineRecordPageDTO = increaseCreditLineRecordService.selectIncreaseCreditLineRecordPage(increaseCreditLineRecordRequestDTO);
+        System.out.println(JsonUtils.toJSONString(increaseCreditLineRecordPageDTO));
     }
 
 }
